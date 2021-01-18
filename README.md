@@ -13,6 +13,7 @@ The program uses:
 - MatPlotLib
 - Statistical Analysis
 - Cool Maths
+- csv files
 
 Process of the project:
 
@@ -21,7 +22,7 @@ https://gisgeography.com/state-outlines-blank-maps-united-states/
 (Beautiful Soup)
 
 2. Resize the images to be 2000 x 2000 pixels
-(Image from Pillow)
+(Image, ImageStat, ImageChops from Pillow)
 
 3. Cut the images up into evenly sized squares
 
@@ -33,8 +34,11 @@ https://gisgeography.com/state-outlines-blank-maps-united-states/
 
 6. Run statistical analysis to calculate fractal dimension of each state
 
-7. Represent the data with MatPlotLib
-(MatPlotLib)
+7. Store data in csv file, extract for next step
+(csv)
 
-8. Build GUI to show off all the data and images
+8. Represent the data with MatPlotLib
+(MatPlotLib.pyplot)
+
+9. Build GUI to show off all the data and images
 (Tkinter)
