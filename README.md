@@ -21,7 +21,7 @@ https://www.youtube.com/watch?v=gB9n2gHsHN4
 (Beautiful Soup)
 
 2. Resize the images to be 2000 x 2000 pixels
-(Image from PilLow)
+(Image from Pillow)
 
 3. Cut the images up into evenly sized squares
 
