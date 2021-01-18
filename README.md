@@ -17,7 +17,7 @@ The program uses:
 Process of the project:
 
 1. Web scrape the 50 outline images of the states off of this website:
-https://www.youtube.com/watch?v=gB9n2gHsHN4
+https://gisgeography.com/state-outlines-blank-maps-united-states/
 (Beautiful Soup)
 
 2. Resize the images to be 2000 x 2000 pixels
