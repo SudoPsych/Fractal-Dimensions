@@ -10,6 +10,8 @@ import os
 from math import log
 import matplotlib.pyplot as plt
 import csv
+import time
+
 
 
 class Fractal:
@@ -21,7 +23,7 @@ class Fractal:
         # Factors of 2000 for perfect grid
         # Factors of 2000:
         # 2, 4, 5, 8, 10, 16, 20, 25, 40, 50, 80, 100, 125, 200, 250, 400, 500, 1000
-        self.factors = [2, 4, 5, 8, 10, 16, 20]
+        self.factors = [2, 4, 5, 8, 10, 16, 20, 25, 40, 50, 80, 100, 125, 200, 250]
 
 
 
@@ -30,6 +32,7 @@ class Fractal:
         # 50 States
         # Get state name
         state_name = img.filename.split('.')[0]
+        img = img.convert('RGB')
 
         img_data = []
         pictures = []
@@ -62,7 +65,7 @@ class Fractal:
                 # Check if outline is in that bit
                 min_value = ImageStat.Stat(image_bit).extrema[0][0]
 
-                if min_value < 3:
+                if min_value == 0:
                     # If outline is in image, tint its color yellow and save value
                     outline_in_image  += 1
 
@@ -140,27 +143,28 @@ class Fractal:
 
         # Add each image of different grid size to respective state folder
         for num in range(len(pictures)):
-            pictures[num].save('Highlighted States/{}/{}{}.jpg'.format(name, name, num))
+            pictures[num].save('Highlighted States/{}/{}_{}.png'.format(name, name, num))
 
 
 
 
     def main(self):
         # Duh main function hur dur
+        start_time = time.time()
 
         # Get images from directory
-        states = os.listdir('outlines')
+        states = os.listdir('bin_outlines')
         # Make directory for processed images
         if not os.path.exists('Highlighted States'):
             os.mkdir('Highlighted States')
-
+        # Remove previous data from csv file
         open('picture_data.csv', 'w').close()
 
         for state_name in states:
 
             # Open image for use
             print(state_name.split('.')[0])
-            state_img = Image.open('outlines/{}'.format(state_name))
+            state_img = Image.open('bin_outlines/{}'.format(state_name))
             # Process images and retrieve data
             img_data, pictures = self.split_image(state_img)
             # Do the fancy math
@@ -169,6 +173,10 @@ class Fractal:
             self.data_to_file(state_name, graph_data)
             # Store processed images in neat directories
             self.store_images(state_name, pictures)
+
+        end_time = time.time()
+        total_time = str(round((end_time - start_time), 2))
+        print('Time elapsed: {}'.format(total_time))
 
 
 Fractal().main()
