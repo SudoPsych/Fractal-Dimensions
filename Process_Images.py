@@ -9,6 +9,7 @@ Next to do:
 
 from PIL import Image, ImageStat, ImageChops
 from matplotlib import pyplot as plt
+import numpy as np
 from math import log
 import os
 import time
@@ -24,8 +25,10 @@ class Fractal:
 
 
 
+
     def split_image(self):
-        # 50 States
+        # Split image into bits, make calculations, and return highlighted images.
+
         # Get state name
         state_name = self.img.filename.split('.')[0]
         img = self.img.convert('RGB')
@@ -35,7 +38,6 @@ class Fractal:
         pictures = []
 
         for factor in self.steps:
-            # 10 diff images
             # Step is number of squares per row/column
             step = factor
             # Increment is number of pixels per step
@@ -48,7 +50,6 @@ class Fractal:
             highlighted_image = Image.new('RGB', size)
 
             for num in range(step ** 2):
-                # Image bits
 
                 # Fancy equations to convert list of numbers into grid
                 x1 = (num % step) * incr
@@ -74,7 +75,6 @@ class Fractal:
 
             # Store images in list
             pictures.append(highlighted_image)
-            #highlighted_image.show()
             # Stores outline ratio data
             img_data.append(outline_in_image)
 
@@ -84,8 +84,11 @@ class Fractal:
 
 
     def calculate_fractal_dimensions(self, img_data):
+        # Fancy math to calculate fractal dimension and linear regression
 
-        graph_data = [[],[],[], 0]
+        s_f = []
+        b_r = []
+        f_d = []
 
         for j in range(len(img_data) - 1):
 
@@ -97,33 +100,35 @@ class Fractal:
             block_ratio = round(block_ratio, 4)
             # Use b_r and s_f with some fancy log math to find f_d
             # This line of code is the focal point of the whole project
-            fractal_dimension = log(block_ratio,scaling_factor)
+            fractal_dimension = log(block_ratio, scaling_factor)
             fractal_dimension = round(fractal_dimension, 4)
-            # Store data in one list for return rather than returning 3
-            graph_data[0].append(scaling_factor)
-            graph_data[1].append(block_ratio)
-            graph_data[2].append(fractal_dimension)
+            # Store data
+            s_f.append(log(scaling_factor))
+            b_r.append(log(block_ratio))
+            f_d.append(fractal_dimension)
 
-        # Get log values of scaling factors and block ratios
-        log_s_f = [log(num) for num in graph_data[0]]
-        log_b_r = [log(num) for num in graph_data[1]]
         # Calculate line of best fit
-        mean_s_f = sum(log_s_f) / len(log_s_f)
-        mean_b_r = sum(log_b_r) / len(log_b_r)
-
+        mean_s_f = sum(s_f) / len(s_f)
+        mean_b_r = sum(b_r) / len(b_r)
         numerator = 0
         denominator = 0
-        for factor, ratio in zip(log_s_f, log_b_r):
+
+        for factor, ratio in zip(s_f, b_r):
             # Linear regression
             numerator += ((factor - mean_s_f) * (ratio - mean_b_r))
             denominator += ((factor - mean_s_f) ** 2)
-        best_fit = numerator / denominator
-        graph_data[3] = best_fit
+
+        # mx + b line of best fit
+        m = numerator / denominator
+        b = mean_b_r - (m * mean_s_f)
+        # Storing the data
+        graph_data = [s_f, b_r, f_d, m, b]
 
         return graph_data
 
 
     def data_to_file(self, name, graph_data):
+        # Store state data in csv file
 
         name_ = name.split('.')[0]
         # Extract data from nested list
@@ -147,12 +152,19 @@ class Fractal:
         # Create the plots from the data
 
         # Unpack the data
-        s_f, b_r, f_r = graph_data
+        s_f, b_r, f_d, m, b  = graph_data
+        # Turning list into numpy arrays cuz matplotlib is picky
+        s_f = np.array(s_f)
+        b_r = np.array(b_r)
+        # Axes
+        plt.xlabel('log(Scaling Factor)')
+        plt.ylabel('log(Block Ratio)')
+        # Scatter plot for values and line of best fit
+        plt.scatter(s_f, b_r, label = "Calculated Values", color = 'b')
+        plt.plot(s_f, (m * s_f) + b, label = "Line of best fit", color = 'r')
 
-        log_s_f = [log(num) for num in s_f]
-        log_b_r = [log(num) for num in b_r]
-
-        plt.plot(log_s_f, log_b_r)
+        plt.legend()
+        plt.show()
 
         return
 
