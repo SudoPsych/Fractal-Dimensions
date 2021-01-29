@@ -1,10 +1,8 @@
 """
 1/15/21
-Next to do:
-- Extract the data from the csv file and display with matplotlib
-- Tidy everything up into a neat GUI that displays all the images and graphs
-- Change the program to accept all different img sizes
-- Try out different fractals and country outlines
+In retrospect, this file should have been written as normal functions
+rather than as a class. It would have made more sense that way when creating the
+GUI but it works fine this way as well.
 """
 
 from PIL import Image, ImageStat, ImageChops
@@ -18,21 +16,24 @@ import csv
 
 class Fractal:
 
-    def __init__(self, img):
+    def __init__(self):
 
         self.steps = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
-        self.img = img
 
 
 
-
-    def split_image(self):
+    def split_image(self, display_img, skeleton_img):
         # Split image into bits, make calculations, and return highlighted images.
+        # skeleton_img is what the program checks for outline
+        # display_img is the image that is highlighted and returned.
+        # ^ Usually is the converted binary outline before being skeletonized.
+        # They can be the same image, this feature is because the skeletonized image shows up poorly in the GUI.
 
-        # Get state name
-        state_name = self.img.filename.split('.')[0]
-        img = self.img.convert('RGB')
-        size = img.size
+        display_img = Image.open(display_img)
+        skeleton_img = Image.open(skeleton_img)
+
+        display_img = display_img.convert('RGB')
+        size = skeleton_img.size
 
         img_data = []
         pictures = []
@@ -45,7 +46,6 @@ class Fractal:
 
             outline_in_image = 0
 
-            image_bits = []
             # Create blank image to paste bits onto
             highlighted_image = Image.new('RGB', size)
 
@@ -58,20 +58,20 @@ class Fractal:
                 y2 = y1 + incr
 
                 # Crop image into small bit, add to list
-                image_bit = img.crop((x1,y1,x2,y2))
-                image_bits.append(image_bit)
+                display_bit = display_img.crop((x1,y1,x2,y2))
+                skeleton_bit = skeleton_img.crop((x1,y1,x2,y2))
                 # Check if outline is in that bit
-                min_value = ImageStat.Stat(image_bit).extrema[0][0]
+                min_value = ImageStat.Stat(skeleton_bit).extrema[0][0]
 
                 if min_value == 0:
                     # If outline is in image, tint its color yellow and save value
                     outline_in_image  += 1
 
                     image_tint = Image.new('RGB', (incr, incr), (255, 0, 0))
-                    image_bits[num] = ImageChops.multiply(image_bits[num], image_tint)
+                    display_bit = ImageChops.multiply(display_bit, image_tint)
 
                 # Reconstructs the original image with the new bits (some are tinted now)
-                highlighted_image.paste(image_bits[num], (x1, y1))
+                highlighted_image.paste(display_bit, (x1, y1))
 
             # Store images in list
             pictures.append(highlighted_image)
@@ -127,25 +127,41 @@ class Fractal:
         return graph_data
 
 
-    def data_to_file(self, name, graph_data):
+    def data_to_file(self, path, graph_data):
         # Store state data in csv file
 
-        name_ = name.split('.')[0]
-        # Extract data from nested list
-        s_f = graph_data[0]
-        b_r = graph_data[1]
-        f_d = graph_data[2]
+        # Extract data from list
+        s_f, b_r, f_d, m, b = graph_data
         # Open csv file for storing this data
-        f = open('picture_data.csv', 'a')
+        f = open(path, 'a')
         write_f = csv.writer(f)
-        # Add header to empty file
-        if os.path.getsize('picture_data.csv') == 0:
-            write_f.writerow(['Name', 'Grid Size', 'Block Ratio', 'Scaling Factor', 'Fractal Dimension'])
-        # The first image will only have a size so write that in
-        write_f.writerow([name_, self.steps[0] ** 2])
-        # Write the data for each (other) image to the file
-        for i in range(len(s_f)):
-            write_f.writerow(['', self.steps[i + 1] ** 2, b_r[i], s_f[i], f_d[i]])
+        # Scaling Factors
+        write_f.writerow(['Scaling Factors'] + [num for num in s_f])
+        # Block Ratio
+        write_f.writerow(['Block Ratio'] + [num for num in b_r])
+        # Fractal Dimension
+        write_f.writerow(['Fractal Dimension'] + [num for num in f_d])
+        # Slope of line
+        write_f.writerow(['Slope', m])
+        # y - intercept of line
+        write_f.writerow(['y - intercept', b])
+
+        return
+
+
+    def get_data(self, file_path):
+        # Get data from csv file
+
+        f = open(file_path, newline='')
+        read_f = csv.reader(f, delimiter=',')
+        s_f = read_f.__next__()[1:]
+        b_r = read_f.__next__()[1:]
+        f_d = read_f.__next__()[1:]
+        m   = read_f.__next__()[1]
+        b   = read_f.__next__()[1]
+
+        graph_data = [s_f, b_r, f_d, m, b]
+        return graph_data
 
 
     def create_plot(self, graph_data):
@@ -153,7 +169,7 @@ class Fractal:
 
         # Unpack the data
         s_f, b_r, f_d, m, b  = graph_data
-        # Turning list into numpy arrays cuz matplotlib is picky
+        # Turning lists into numpy arrays cuz matplotlib is picky
         s_f = np.array(s_f)
         b_r = np.array(b_r)
         # Axes
@@ -170,30 +186,33 @@ class Fractal:
 
 
 
-    def store_images(self, name, pictures):
+    def store_images(self, pictures, name):
 
-        # Create a folder for each state within highlighted states
-        name = name.split('.')[0]
-        if not os.path.exists('Highlighted States/{}'.format(name)):
-            os.mkdir('Highlighted States/{}'.format(name))
+        # Check if dir exists first
+        if not os.path.exists('image_data/Custom/highlighted/' + name):
+            os.mkdir('image_data/Custom/highlighted/' + name)
 
-        # Add each image of different grid size to respective state folder
+        # Add each image of different grid size to its designated folder
         for num in range(len(pictures)):
             pic_size = self.steps[num]
-            pictures[num].save('Highlighted States/{}/{}_{}.png'.format(name, name, pic_size))
+            pictures[num].save('image_data/Custom/highlighted/{}/{}_{}.png'.format(name, name, pic_size))
+
 
 
 
 def main():
     # Generate images and data for 50 States, store the data so this function won't need to be run
     # every time the GUI is opened.
+
+    # Fix this code!
+
     start_time = time.time()
 
     # Get images from directory
-    states = os.listdir('thin_bin_outlines')
+    states = os.listdir('image_data/States/skeleton')
     # Make directory for processed images
-    if not os.path.exists('Highlighted States'):
-        os.mkdir('Highlighted States')
+    if not os.path.exists('image_data/States/highlighted'):
+        os.mkdir('image_data/States/highlighted')
     # Remove previous data from csv file
     open('picture_data.csv', 'w').close()
 
@@ -201,19 +220,20 @@ def main():
 
         state_time1 = time.time()
 
-        # Open image for use
         print(state_name.split('.')[0])
-        state_img = Image.open('thin_bin_outlines/{}'.format(state_name))
+        # Get path to thick and thin image for processing
+        bin_path = 'image_data/states/binary/{}'.format(state_name)
+        thin_bin_path = 'image_data/states/skeleton/{}'.format(state_name)
         # Create object with image parameter
-        state_object = Fractal(state_img)
+        _Fractal = Fractal()
         # Process images and retrieve data
-        img_data, pictures = state_object.split_image()
+        img_data, pictures = _Fractal.split_image(bin_path, thin_bin_path)
         # Do the fancy math
-        graph_data = state_object.calculate_fractal_dimensions(img_data)
+        graph_data = _Fractal.calculate_fractal_dimensions(img_data)
         # Store processed images in neat directories
-        state_object.store_images(state_name, pictures)
+        _Fractal.store_images(state_name, pictures)
         # Store state data in csv file
-        state_object.data_to_file(state_name, graph_data)
+        _Fractal.data_to_file(state_name, graph_data)
 
         state_time2 = time.time()
         print(str(round((state_time2 - state_time1), 2)))
@@ -226,4 +246,4 @@ def main():
 
 
 if __name__ == '__main__':
-     main()
+    main()
