@@ -9,39 +9,29 @@ from skimage.morphology import skeletonize
 import numpy
 
 
-def resize(img, size):
+def resize_(img_path):
     # Change image to be given size
 
-    img = Image.open(img)
+    img = Image.open(img_path)
     # Get length of image sides
-    major_length = max(img.size)
-    minor_length = min(img.size)
-    # Get index i.e. vertical or horizontal
-    major_index = img.size.index(major_length)
-    minor_index = img.size.index(minor_length)
-    # Value to scale image by
-    multiplier = size / major_length
-    # New image lengths
-    new_major = int(multiplier * major_length)
-    new_minor = int(multiplier * minor_length)
-    # Uhhhh
-    new_size = [0, 0]
-    # Set new image lengths
-    new_size[major_index] = new_major
-    new_size[minor_index] = new_minor
-    new_size = tuple(new_size)
-    # Make image a square (based on major length) and return it
-    new_img = Image.new('RGB', (size, size), color=(255, 255, 255))
-    new_img.paste(img, (int((size - new_size[0]) / 2),
-                        int((size - new_size[1]) / 2)))
+    major_len = max(img.size)
+    img_size = img.size
+
+    new_img = Image.new('RGB', (major_len, major_len), color=(255, 255, 255))
+    new_img.paste(img, (int((major_len - img_size[0]) / 2),
+                        int((major_len - img_size[1]) / 2)))
+
+    new_img = new_img.resize((2000, 2000))
+
     return new_img
 
 
-def convert_to_binary(img):
+def convert_to_binary(img_path):
     # Convert all the pixels in the image to either black or white
 
     time1 = time.time()
     count = 0
+    img = Image.open(img_path)
     size = img.size
     new_img = Image.new('1', size)
 
@@ -58,18 +48,14 @@ def convert_to_binary(img):
                 new_img.putpixel((x,y), (0))
             else:
                 new_img.putpixel((x,y), (1))
-    # Uhhhhh fix this
-    name = os.path.basename(img.filename)
-    name = name.split('.')[0]
-    print(name)
-    new_img.save('serp.png'.format(name))
 
     time2 = time.time()
     print(round((time2 - time1), 2))
-    return
+
+    return new_img
 
 
-def skelotnize_(img_path):
+def skeletonize_(img_path):
     # Turn ugly fat lines into easy to work with thin ones
 
     time1 = time.time()
@@ -99,10 +85,9 @@ def skelotnize_(img_path):
             # Create new, skeletonized image. (Re-invert colors)
             thinned_img.putpixel((x,y), not thinned_image[x][y])
 
-    thinned_img.save(img_path)
-
     time2 = time.time()
     total_time = str(round((time2 - time1), 2))
     print('Time elapsed: {}'.format(total_time))
-    return
+
+    return thinned_img
 
