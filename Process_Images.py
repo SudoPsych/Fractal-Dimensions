@@ -18,7 +18,8 @@ class Fractal:
 
     def __init__(self):
 
-        self.steps = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+        # Nice even factors of 2000
+        self.steps = [10, 16, 20, 25, 40, 50, 80, 100, 125, 200]
 
 
 
@@ -33,7 +34,6 @@ class Fractal:
         skeleton_img = Image.open(skeleton_img)
 
         display_img = display_img.convert('RGB')
-        size = skeleton_img.size
 
         img_data = []
         pictures = []
@@ -42,12 +42,12 @@ class Fractal:
             # Step is number of squares per row/column
             step = factor
             # Increment is number of pixels per step
-            incr = int(size[0] / step)
+            incr = 2000 // step
 
             outline_in_image = 0
 
             # Create blank image to paste bits onto
-            highlighted_image = Image.new('RGB', size)
+            highlighted_image = Image.new('RGB', (2000, 2000))
 
             for num in range(step ** 2):
 
@@ -60,6 +60,7 @@ class Fractal:
                 # Crop image into small bit, add to list
                 display_bit = display_img.crop((x1,y1,x2,y2))
                 skeleton_bit = skeleton_img.crop((x1,y1,x2,y2))
+
                 # Check if outline is in that bit
                 min_value = ImageStat.Stat(skeleton_bit).extrema[0][0]
 
@@ -194,8 +195,7 @@ class Fractal:
 
         # Add each image of different grid size to its designated folder
         for num in range(len(pictures)):
-            pic_size = self.steps[num]
-            pictures[num].save('image_data/Custom/highlighted/{}/{}_{}.png'.format(name, name, pic_size))
+            pictures[num].save('image_data/Custom/highlighted/{}/{}_{}.png'.format(name, name, num))
 
 
 
