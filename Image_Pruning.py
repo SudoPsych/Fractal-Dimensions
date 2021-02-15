@@ -2,7 +2,6 @@
 1/10/21
 """
 
-import os
 from PIL import Image
 import time
 from skimage.morphology import skeletonize
@@ -83,7 +82,7 @@ def skeletonize_(img_path):
     for x in range(size[0]):
         for y in range(size[0]):
             # Create new, skeletonized image. (Re-invert colors)
-            thinned_img.putpixel((x,y), not thinned_image[x][y])
+            thinned_img.putpixel((x,y), 0 if not thinned_image[x][y] else 1)
 
     time2 = time.time()
     total_time = str(round((time2 - time1), 2))
