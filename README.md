@@ -1,4 +1,4 @@
-# Fractal-Dimension_50_US_States
+# Fractal-Dimension
 
 This program is designed to calculate the fractal dimension of each of 50 US states (and any user inputed image).
 I got the idea for this project from 3Blue1Brown's video about fractals and thought it would be a 
