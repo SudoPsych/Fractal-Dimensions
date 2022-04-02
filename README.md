@@ -11,12 +11,19 @@ to calculate the Hausdorff Dimension of the given image. The GUI stores and disp
 
 ## Implementations:
 > Web scraping
+> 
 > Image Processing
+> 
 > os pathing
+> 
 > MatPlotLib
+> 
 > Statistical Analysis
+> 
 > Cool Maths
+> 
 > csv files
+> 
 > GUI
 
 ## Program Steps
