@@ -1,24 +1,27 @@
 # Fractal-Dimension
 
-This program is designed to calculate the fractal dimension of each of 50 US states (and any user inputed image).
-I got the idea for this project from 3Blue1Brown's video about fractals and thought it would be a 
-cool thing to try out for myself. Link to video here -> https://www.youtube.com/watch?v=gB9n2gHsHN4
+This program implements a graphical user interface that accepts and maniuplates images from the user and performs image processing and mathematical analysis on them
+to calculate the Hausdorff Dimension of the given image. The GUI stores and displays the maniuplated images used to calculate the dimension of the image
+(preferably a fractal) as well as allowing the user to delete images, display plots, and add custom photos.
 
-This is another project intented to expand my breadth of knowledge of Python and programming in general.
+# Example Image of GUI
 
-The program uses:
-- Web scraping
-- Image Processing
-- os pathing
-- MatPlotLib
-- Statistical Analysis
-- Cool Maths
-- csv files
-- GUI
+![GUI](https://github.com/SudoPsych/Fractal-Dimensions/blob/main/GUI_example.png?raw=true)
+(matplotlib plot is separate window)
 
-Process of the project:
+## Implementations:
+> Web scraping
+> Image Processing
+> os pathing
+> MatPlotLib
+> Statistical Analysis
+> Cool Maths
+> csv files
+> GUI
 
-1. Web scrape the 50 outline images of the states off of this website:
+## Program Steps
+
+1. Web scrape the 50 outline images of the American states off of this website:
 https://gisgeography.com/state-outlines-blank-maps-united-states/
 (Beautiful Soup)
 
